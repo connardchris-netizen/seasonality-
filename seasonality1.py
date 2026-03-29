@@ -35,41 +35,45 @@ def run_study(symbol: str, start_year: int, end_year: int, slice_start: str, sli
         st.error("Downloaded data does not contain a Close column.")
         return
 
-    prices = df["Close"].dropna()
+    
 
+    prices = df["Close"].dropna()
+    
     yearly_returns = []
     cumulative_returns = []
     valid_years = []
-
-    # Step 3: Compute slice returns
+    
     for year in range(start_year, end_year + 1):
         try:
             start = pd.to_datetime(f"{year}-{slice_start}")
             end = pd.to_datetime(f"{year}-{slice_end}")
-
+    
             if start > prices.index[-1] or end > prices.index[-1]:
                 continue
-
+    
             start_idx = prices.index.get_indexer([start], method="nearest")[0]
             end_idx = prices.index.get_indexer([end], method="nearest")[0]
-
+    
             if end_idx <= start_idx:
                 continue
-
+    
             start_price = prices.iloc[start_idx]
             end_price = prices.iloc[end_idx]
+    
             ret = (end_price - start_price) / start_price * 100
-
-            yearly_returns.append(ret)
+    
+            yearly_returns.append(float(ret))
             valid_years.append(year)
-
+    
             if not cumulative_returns:
                 cumulative_returns.append(1 + ret / 100)
             else:
-                cumulative_returns.append(cumulative_returns[-1] * (1 + ret / 100))
+                cumulative_returns.append(
+                    cumulative_returns[-1] * (1 + ret / 100)
+                )
+    
         except Exception:
             continue
-
     if not yearly_returns:
         st.warning("No valid yearly returns found for that setup.")
         return
