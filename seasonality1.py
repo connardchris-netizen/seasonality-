@@ -37,14 +37,21 @@ def run_study(symbol: str, start_year: int, end_year: int, slice_start: str, sli
 
     
 
-    prices = df["Close"].dropna()
+    prices = df["Close"]
+    
+    if isinstance(prices, pd.DataFrame):
+        prices = prices.iloc[:, 0]
+    
+    prices = prices.astype(float).dropna()
     
     yearly_returns = []
     cumulative_returns = []
     valid_years = []
     
     for year in range(start_year, end_year + 1):
+    
         try:
+    
             start = pd.to_datetime(f"{year}-{slice_start}")
             end = pd.to_datetime(f"{year}-{slice_end}")
     
@@ -57,12 +64,12 @@ def run_study(symbol: str, start_year: int, end_year: int, slice_start: str, sli
             if end_idx <= start_idx:
                 continue
     
-            start_price = prices.iloc[start_idx]
-            end_price = prices.iloc[end_idx]
+            start_price = float(prices.iloc[start_idx])
+            end_price = float(prices.iloc[end_idx])
     
             ret = (end_price - start_price) / start_price * 100
     
-            yearly_returns.append(float(ret))
+            yearly_returns.append(ret)
             valid_years.append(year)
     
             if not cumulative_returns:
